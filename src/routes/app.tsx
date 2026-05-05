@@ -4,6 +4,7 @@ import { useSession } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Leaf, Stethoscope, LineChart, MessageCircleHeart, History, LogOut, Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export const Route = createFileRoute("/app")({
   component: AppLayout,
@@ -56,12 +57,15 @@ function AppLayout() {
           })}
         </nav>
 
-        <button
-          onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
-          className="clay-sm smooth p-2.5 rounded-xl hover:scale-105" aria-label="Sign out"
-        >
-          <LogOut className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <button
+            onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/" }); }}
+            className="clay-sm smooth p-2.5 rounded-xl hover:scale-105" aria-label="Sign out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-6">

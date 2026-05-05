@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getHistory } from "@/server/agri.functions";
 import { History as HistoryIcon, Stethoscope, LineChart, Loader2 } from "lucide-react";
+import { authedCall } from "@/lib/api";
 
 export const Route = createFileRoute("/app/history")({
   component: HistoryPage,
@@ -17,7 +18,7 @@ function HistoryPage() {
   const [open, setOpen] = useState<Item | null>(null);
 
   useEffect(() => {
-    fn({}).then((r: any) => setItems(r.items)).finally(() => setLoading(false));
+    authedCall(fn).then((r: any) => setItems(r.items)).finally(() => setLoading(false));
   }, [fn]);
 
   return (

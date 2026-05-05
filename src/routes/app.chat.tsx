@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { chatWithAssistant, getChatHistory } from "@/server/agri.functions";
 import { MessageCircleHeart, Send, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { authedCall, getStoredLanguage } from "@/lib/api";
 
 export const Route = createFileRoute("/app/chat")({
   component: ChatPage,
@@ -36,7 +37,7 @@ function ChatPage() {
     let id = localStorage.getItem("agri_conv");
     if (!id) { id = genId(); localStorage.setItem("agri_conv", id); }
     setConv(id);
-    fetchHist({ data: { conversationId: id } })
+    authedCall(fetchHist, { conversationId: id })
       .then((r: any) => setMessages(r.messages.map((m: any) => ({ role: m.role, content: m.content }))))
       .catch(() => {});
   }, [fetchHist]);
@@ -52,7 +53,7 @@ function ChatPage() {
     setInput("");
     setBusy(true);
     try {
-      const r: any = await send({ data: { conversationId: conv, message: msg } });
+      const r: any = await authedCall(send, { conversationId: conv, message: msg, language: getStoredLanguage() });
       setMessages(m => [...m, { role: "assistant", content: r.reply }]);
     } catch (e: any) {
       toast.error(e.message ?? "Could not reach the assistant");

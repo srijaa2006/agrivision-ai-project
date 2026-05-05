@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { analyzeDisease } from "@/server/agri.functions";
 import { Upload, Loader2, Stethoscope, Heart, Shield, Pill, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { authedCall, getStoredLanguage } from "@/lib/api";
 
 export const Route = createFileRoute("/app/disease")({
   component: DiseasePage,
@@ -35,7 +36,7 @@ function DiseasePage() {
     if (!preview) return;
     setLoading(true);
     try {
-      const r = await fn({ data: { imageBase64: preview, cropHint: hint || undefined } });
+      const r = await authedCall(fn, { imageBase64: preview, cropHint: hint || undefined, language: getStoredLanguage() });
       setResult(r as Result);
     } catch (e: any) {
       toast.error(e.message ?? "Analysis failed");
