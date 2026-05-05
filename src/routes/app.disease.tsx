@@ -5,6 +5,7 @@ import { analyzeDisease } from "@/server/agri.functions";
 import { Upload, Loader2, Stethoscope, Heart, Shield, Pill, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { authedCall, getStoredLanguage } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/disease")({
   component: DiseasePage,
