@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { predictYield } from "@/server/agri.functions";
-import { LineChart, Loader2, Heart, Sprout, AlertTriangle, Lightbulb } from "lucide-react";
+import { LineChart, Loader2, Heart, Sprout, AlertTriangle, Lightbulb, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { authedCall, getStoredLanguage } from "@/lib/api";
 
 export const Route = createFileRoute("/app/yield")({
   component: YieldPage,
@@ -20,15 +21,52 @@ function YieldPage() {
     crop: "", areaHectares: 1, soilType: "loamy", rainfallMm: 600, season: "kharif", region: "", notes: ""
   });
   const [loading, setLoading] = useState(false);
+  const [detecting, setDetecting] = useState(false);
   const [result, setResult] = useState<R | null>(null);
 
   function set<K extends keyof typeof form>(k: K, v: any) { setForm(p => ({ ...p, [k]: v })); }
+
+  async function detectRainfall() {
+    if (!("geolocation" in navigator)) { toast.error("Location not supported on this device"); return; }
+    setDetecting(true);
+    try {
+      const pos = await new Promise<GeolocationPosition>((res, rej) =>
+        navigator.geolocation.getCurrentPosition(res, rej, { timeout: 10000 })
+      );
+      const { latitude, longitude } = pos.coords;
+      // Open-Meteo: total annual precipitation (last full year). No API key required.
+      const end = new Date(); end.setDate(end.getDate() - 1);
+      const start = new Date(end); start.setFullYear(start.getFullYear() - 1);
+      const fmt = (d: Date) => d.toISOString().slice(0, 10);
+      const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${fmt(start)}&end_date=${fmt(end)}&daily=precipitation_sum&timezone=auto`;
+      const r = await fetch(url);
+      if (!r.ok) throw new Error("Weather service unavailable");
+      const j = await r.json();
+      const arr: number[] = j?.daily?.precipitation_sum ?? [];
+      const total = Math.round(arr.reduce((a, v) => a + (v || 0), 0));
+      if (!total) throw new Error("No rainfall data for your area");
+
+      // Reverse geocode for region (best-effort)
+      let region = form.region;
+      try {
+        const g = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&language=en&format=json`);
+        const gj = await g.json();
+        const place = gj?.results?.[0];
+        if (place) region = [place.admin1, place.country].filter(Boolean).join(", ");
+      } catch {/* ignore */}
+
+      setForm(p => ({ ...p, rainfallMm: total, region }));
+      toast.success(`Detected ${total} mm annual rainfall`);
+    } catch (e: any) {
+      toast.error(e.message ?? "Couldn't detect rainfall — please enter manually");
+    } finally { setDetecting(false); }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
-      const r = await fn({ data: form });
+      const r = await authedCall(fn, { ...form, language: getStoredLanguage() });
       setResult(r as R);
     } catch (e: any) { toast.error(e.message ?? "Failed"); } finally { setLoading(false); }
   }
