@@ -17,6 +17,7 @@ type R = {
 };
 
 function YieldPage() {
+  const { t } = useT();
   const fn = useServerFn(predictYield);
   const [form, setForm] = useState({
     crop: "", areaHectares: 1, soilType: "loamy", rainfallMm: 600, season: "kharif", region: "", notes: ""
