@@ -5,6 +5,7 @@ import { predictYield } from "@/server/agri.functions";
 import { LineChart, Loader2, Heart, Sprout, AlertTriangle, Lightbulb, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { authedCall, getStoredLanguage } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/yield")({
   component: YieldPage,
