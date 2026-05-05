@@ -13,6 +13,10 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppYieldRouteImport } from './routes/app.yield'
+import { Route as AppHistoryRouteImport } from './routes/app.history'
+import { Route as AppDiseaseRouteImport } from './routes/app.disease'
+import { Route as AppChatRouteImport } from './routes/app.chat'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -34,16 +38,44 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppYieldRoute = AppYieldRouteImport.update({
+  id: '/yield',
+  path: '/yield',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDiseaseRoute = AppDiseaseRouteImport.update({
+  id: '/disease',
+  path: '/disease',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/disease': typeof AppDiseaseRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/yield': typeof AppYieldRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/disease': typeof AppDiseaseRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/yield': typeof AppYieldRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -51,14 +83,42 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/disease': typeof AppDiseaseRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/yield': typeof AppYieldRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/auth' | '/app/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/app/chat'
+    | '/app/disease'
+    | '/app/history'
+    | '/app/yield'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/app'
-  id: '__root__' | '/' | '/app' | '/auth' | '/app/'
+  to:
+    | '/'
+    | '/auth'
+    | '/app/chat'
+    | '/app/disease'
+    | '/app/history'
+    | '/app/yield'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/app/chat'
+    | '/app/disease'
+    | '/app/history'
+    | '/app/yield'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -97,14 +157,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/yield': {
+      id: '/app/yield'
+      path: '/yield'
+      fullPath: '/app/yield'
+      preLoaderRoute: typeof AppYieldRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/history': {
+      id: '/app/history'
+      path: '/history'
+      fullPath: '/app/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/disease': {
+      id: '/app/disease'
+      path: '/disease'
+      fullPath: '/app/disease'
+      preLoaderRoute: typeof AppDiseaseRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/chat': {
+      id: '/app/chat'
+      path: '/chat'
+      fullPath: '/app/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppChatRoute: typeof AppChatRoute
+  AppDiseaseRoute: typeof AppDiseaseRoute
+  AppHistoryRoute: typeof AppHistoryRoute
+  AppYieldRoute: typeof AppYieldRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppChatRoute: AppChatRoute,
+  AppDiseaseRoute: AppDiseaseRoute,
+  AppHistoryRoute: AppHistoryRoute,
+  AppYieldRoute: AppYieldRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
