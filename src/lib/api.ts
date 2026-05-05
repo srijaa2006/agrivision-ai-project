@@ -4,10 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
  * Wrapper that always attaches the Supabase Bearer token to a TanStack server fn call.
  * Use it instead of calling the server fn directly so requireSupabaseAuth middleware succeeds.
  */
-export async function authedCall<TInput, TOutput>(
-  fn: (opts: { data?: TInput; headers?: Record<string, string> }) => Promise<TOutput>,
-  data?: TInput,
-): Promise<TOutput> {
+export async function authedCall(fn: any, data?: any): Promise<any> {
   const { data: s } = await supabase.auth.getSession();
   const token = s.session?.access_token;
   if (!token) throw new Error("You're signed out. Please sign in again.");
