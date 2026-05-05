@@ -3,7 +3,7 @@ import heroClay from "@/assets/hero-clay.jpg";
 import clayLeaf from "@/assets/clay-leaf.png";
 import clayWheat from "@/assets/clay-wheat.png";
 import clayChat from "@/assets/clay-chat.png";
-import { Sparkles, Leaf, LineChart, MessageCircleHeart, ArrowRight } from "lucide-react";
+import { Sparkles, Leaf, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
