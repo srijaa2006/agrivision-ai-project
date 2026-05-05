@@ -17,6 +17,7 @@ type Result = {
 };
 
 function DiseasePage() {
+  const { t } = useT();
   const fn = useServerFn(analyzeDisease);
   const [preview, setPreview] = useState<string | null>(null);
   const [hint, setHint] = useState("");
