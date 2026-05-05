@@ -2,13 +2,21 @@ import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Wrapper that always attaches the Supabase Bearer token to a TanStack server fn call.
- * Use it instead of calling the server fn directly so requireSupabaseAuth middleware succeeds.
  */
 export async function authedCall(fn: any, data?: any): Promise<any> {
   const { data: s } = await supabase.auth.getSession();
   const token = s.session?.access_token;
   if (!token) throw new Error("You're signed out. Please sign in again.");
-  return fn({ data, headers: { Authorization: `Bearer ${token}` } });
+  try {
+    return await fn({ data, headers: { Authorization: `Bearer ${token}` } });
+  } catch (e: any) {
+    // Surface a friendlier error for network failures (offline / blocked / aborted).
+    const msg = String(e?.message || e || "");
+    if (msg === "Failed to fetch" || msg.toLowerCase().includes("networkerror") || msg.toLowerCase().includes("load failed")) {
+      throw new Error("Network hiccup — please check your connection and try again.");
+    }
+    throw e;
+  }
 }
 
 export function getStoredLanguage(): string {
