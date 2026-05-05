@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppYieldRouteImport } from './routes/app.yield'
+import { Route as AppWeatherRouteImport } from './routes/app.weather'
 import { Route as AppHistoryRouteImport } from './routes/app.history'
 import { Route as AppDiseaseRouteImport } from './routes/app.disease'
 import { Route as AppChatRouteImport } from './routes/app.chat'
@@ -43,6 +44,11 @@ const AppYieldRoute = AppYieldRouteImport.update({
   path: '/yield',
   getParentRoute: () => AppRoute,
 } as any)
+const AppWeatherRoute = AppWeatherRouteImport.update({
+  id: '/weather',
+  path: '/weather',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppHistoryRoute = AppHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/app/chat': typeof AppChatRoute
   '/app/disease': typeof AppDiseaseRoute
   '/app/history': typeof AppHistoryRoute
+  '/app/weather': typeof AppWeatherRoute
   '/app/yield': typeof AppYieldRoute
   '/app/': typeof AppIndexRoute
 }
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/app/chat': typeof AppChatRoute
   '/app/disease': typeof AppDiseaseRoute
   '/app/history': typeof AppHistoryRoute
+  '/app/weather': typeof AppWeatherRoute
   '/app/yield': typeof AppYieldRoute
   '/app': typeof AppIndexRoute
 }
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/app/chat': typeof AppChatRoute
   '/app/disease': typeof AppDiseaseRoute
   '/app/history': typeof AppHistoryRoute
+  '/app/weather': typeof AppWeatherRoute
   '/app/yield': typeof AppYieldRoute
   '/app/': typeof AppIndexRoute
 }
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/app/chat'
     | '/app/disease'
     | '/app/history'
+    | '/app/weather'
     | '/app/yield'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/app/chat'
     | '/app/disease'
     | '/app/history'
+    | '/app/weather'
     | '/app/yield'
     | '/app'
   id:
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/app/chat'
     | '/app/disease'
     | '/app/history'
+    | '/app/weather'
     | '/app/yield'
     | '/app/'
   fileRoutesById: FileRoutesById
@@ -164,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppYieldRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/weather': {
+      id: '/app/weather'
+      path: '/weather'
+      fullPath: '/app/weather'
+      preLoaderRoute: typeof AppWeatherRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/history': {
       id: '/app/history'
       path: '/history'
@@ -192,6 +211,7 @@ interface AppRouteChildren {
   AppChatRoute: typeof AppChatRoute
   AppDiseaseRoute: typeof AppDiseaseRoute
   AppHistoryRoute: typeof AppHistoryRoute
+  AppWeatherRoute: typeof AppWeatherRoute
   AppYieldRoute: typeof AppYieldRoute
   AppIndexRoute: typeof AppIndexRoute
 }
@@ -200,6 +220,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppChatRoute: AppChatRoute,
   AppDiseaseRoute: AppDiseaseRoute,
   AppHistoryRoute: AppHistoryRoute,
+  AppWeatherRoute: AppWeatherRoute,
   AppYieldRoute: AppYieldRoute,
   AppIndexRoute: AppIndexRoute,
 }

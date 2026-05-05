@@ -5,6 +5,7 @@ import { analyzeDisease } from "@/server/agri.functions";
 import { Upload, Loader2, Stethoscope, Heart, Shield, Pill, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { authedCall, getStoredLanguage } from "@/lib/api";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/disease")({
   component: DiseasePage,
@@ -16,6 +17,7 @@ type Result = {
 };
 
 function DiseasePage() {
+  const { t } = useT();
   const fn = useServerFn(analyzeDisease);
   const [preview, setPreview] = useState<string | null>(null);
   const [hint, setHint] = useState("");
@@ -49,8 +51,8 @@ function DiseasePage() {
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl grad-leaf flex items-center justify-center clay-sm"><Stethoscope className="w-6 h-6 text-primary-foreground" /></div>
           <div>
-            <h1 className="font-display text-3xl font-bold">Crop disease analysis</h1>
-            <p className="text-sm text-muted-foreground">Upload a clear photo of the affected leaf or fruit.</p>
+            <h1 className="font-display text-3xl font-bold">{t("disease_title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("disease_sub")}</p>
           </div>
         </div>
 
@@ -61,8 +63,8 @@ function DiseasePage() {
           ) : (
             <div className="py-10">
               <Upload className="w-10 h-10 mx-auto text-primary mb-3" />
-              <p className="font-semibold">Click to upload a photo</p>
-              <p className="text-xs text-muted-foreground mt-1">JPG / PNG · up to 8MB</p>
+              <p className="font-semibold">{t("upload_click")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("upload_hint")}</p>
             </div>
           )}
           <input ref={inputRef} type="file" accept="image/*" hidden onChange={e => onFile(e.target.files?.[0])} />
@@ -70,13 +72,13 @@ function DiseasePage() {
 
         <div className="clay-inset px-4 py-3">
           <input value={hint} onChange={e => setHint(e.target.value)}
-            placeholder="Optional: crop name (e.g., tomato, rice)"
+            placeholder={t("optional_crop")}
             className="bg-transparent outline-none w-full text-sm" maxLength={120} />
         </div>
 
         <button onClick={analyze} disabled={!preview || loading}
           className="w-full grad-leaf text-primary-foreground py-3.5 rounded-2xl font-semibold smooth hover:scale-[1.02] disabled:opacity-50 inline-flex justify-center items-center gap-2">
-          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Analyzing…</> : "Diagnose now"}
+          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("analyzing")}</> : t("diagnose_now")}
         </button>
       </section>
 
@@ -86,11 +88,11 @@ function DiseasePage() {
             <div className="w-20 h-20 rounded-3xl grad-leaf mx-auto mb-4 flex items-center justify-center float clay-sm">
               <Stethoscope className="w-10 h-10 text-primary-foreground" />
             </div>
-            <h3 className="font-display text-xl font-bold">Your diagnosis appears here</h3>
-            <p className="text-sm text-muted-foreground mt-2">Upload a leaf photo to begin.</p>
+            <h3 className="font-display text-xl font-bold">{t("diagnosis_appears")}</h3>
+            <p className="text-sm text-muted-foreground mt-2">{t("diagnosis_appears_sub")}</p>
           </div>
         )}
-        {loading && <div className="clay p-10 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" /><p className="mt-3 text-muted-foreground">Looking carefully at your photo…</p></div>}
+        {loading && <div className="clay p-10 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" /><p className="mt-3 text-muted-foreground">{t("analyzing")}</p></div>}
         {result && (
           <>
             <div className="clay p-6">
@@ -100,7 +102,7 @@ function DiseasePage() {
                   <h2 className="font-display text-3xl font-bold text-grad-leaf">{result.disease}</h2>
                 </div>
                 <div className="flex flex-col gap-1.5 items-end">
-                  <Badge>{result.confidence} confidence</Badge>
+                  <Badge>{result.confidence} {t("confidence")}</Badge>
                   <Badge tone="warn">{result.severity}</Badge>
                 </div>
               </div>
@@ -109,9 +111,9 @@ function DiseasePage() {
               </p>
             </div>
 
-            <Section icon={AlertTriangle} title="Symptoms" items={result.symptoms} />
-            <Section icon={Pill} title="Treatment" items={result.treatment} />
-            <Section icon={Shield} title="Prevention" items={result.prevention} />
+            <Section icon={AlertTriangle} title={t("symptoms")} items={result.symptoms} />
+            <Section icon={Pill} title={t("treatment")} items={result.treatment} />
+            <Section icon={Shield} title={t("prevention")} items={result.prevention} />
           </>
         )}
       </section>
