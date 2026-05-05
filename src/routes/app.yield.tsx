@@ -85,7 +85,17 @@ function YieldPage() {
         <Field label="Crop"><input required maxLength={60} value={form.crop} onChange={e => set("crop", e.target.value)} placeholder="e.g. Rice, Wheat, Maize" className="input-clean" /></Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Area (hectares)"><input required type="number" min={0.01} step={0.1} value={form.areaHectares} onChange={e => set("areaHectares", +e.target.value)} className="input-clean" /></Field>
-          <Field label="Rainfall (mm)"><input required type="number" min={0} value={form.rainfallMm} onChange={e => set("rainfallMm", +e.target.value)} className="input-clean" /></Field>
+          <Field label="Rainfall (mm/yr)">
+            <div className="flex gap-2 items-stretch">
+              <input required type="number" min={0} value={form.rainfallMm} onChange={e => set("rainfallMm", +e.target.value)} className="input-clean flex-1" />
+              <button type="button" onClick={detectRainfall} disabled={detecting}
+                title="Auto-detect from your location"
+                className="clay-sm smooth px-3 rounded-xl hover:scale-105 disabled:opacity-50 inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                {detecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+                Auto
+              </button>
+            </div>
+          </Field>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Soil type">
