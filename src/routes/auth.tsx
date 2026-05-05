@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { Leaf, Mail, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +28,21 @@ function AuthPage() {
       if (data.session) navigate({ to: "/app" });
     });
   }, [navigate]);
+
+  async function signInGoogle() {
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}/app`,
+      });
+      if (result.error) throw new Error(result.error.message ?? "Google sign-in failed");
+      if (result.redirected) return;
+      navigate({ to: "/app" });
+    } catch (err: any) {
+      toast.error(err.message ?? "Google sign-in failed");
+      setLoading(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -106,6 +122,27 @@ function AuthPage() {
               {mode === "signin" ? "Sign in" : "Create account"}
             </button>
           </form>
+
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px bg-border flex-1" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <div className="h-px bg-border flex-1" />
+          </div>
+
+          <button
+            type="button"
+            onClick={signInGoogle}
+            disabled={loading}
+            className="w-full clay-sm bg-card py-3.5 rounded-2xl font-semibold smooth hover:scale-[1.02] disabled:opacity-60 inline-flex items-center justify-center gap-3"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/>
+              <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+              <path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.4l-6.5-5.5C29.6 34.6 26.9 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.6 39.6 16.2 44 24 44z"/>
+              <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.5 5.5c-.5.5 7.1-5.2 7.1-15.2 0-1.3-.1-2.3-.4-3.5z"/>
+            </svg>
+            Continue with Google
+          </button>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {mode === "signin" ? "New here?" : "Already a member?"}{" "}
