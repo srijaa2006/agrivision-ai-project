@@ -126,24 +126,25 @@ const Ctx = createContext<I18nCtx>({ t: (k) => STRINGS[k], lang: "English", load
 export function I18nProvider({ children }: { children: ReactNode }) {
   const fn = useServerFn(translateUI);
   const [lang, setLang] = useState<string>(() => getStoredLanguage());
-  const [dict, setDict] = useState<Dict>(STRINGS as unknown as Dict);
+  const [dict, setDict] = useState<Dict>(() => instantDictFor(getStoredLanguage()));
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async (l: string) => {
     if (l.toLowerCase() === "english") { setDict(STRINGS as unknown as Dict); return; }
+    setDict(instantDictFor(l));
     const cacheKey = `agri_i18n_${l}`;
     const cached = typeof window !== "undefined" ? localStorage.getItem(cacheKey) : null;
     if (cached) {
-      try { setDict({ ...(STRINGS as unknown as Dict), ...JSON.parse(cached) }); return; } catch {/* ignore */}
+      try { setDict({ ...instantDictFor(l), ...JSON.parse(cached) }); return; } catch {/* ignore */}
     }
     setLoading(true);
     try {
       const res = await fn({ data: { language: l, keys: STRINGS as unknown as Dict } });
-      const merged = { ...(STRINGS as unknown as Dict), ...(res.translations || {}) };
+      const merged = { ...instantDictFor(l), ...(res.translations || {}) };
       setDict(merged);
       try { localStorage.setItem(cacheKey, JSON.stringify(res.translations || {})); } catch {/* ignore */}
     } catch {
-      setDict(STRINGS as unknown as Dict);
+      setDict(instantDictFor(l));
     } finally { setLoading(false); }
   }, [fn]);
 
@@ -152,7 +153,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as string;
-      if (detail) setLang(detail);
+      if (detail) {
+        setDict(instantDictFor(detail));
+        setLang(detail);
+      }
     };
     window.addEventListener("agri:lang", handler);
     return () => window.removeEventListener("agri:lang", handler);
