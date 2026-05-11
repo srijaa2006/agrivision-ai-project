@@ -2,8 +2,9 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { Leaf, Mail, Lock, Loader2 } from "lucide-react";
+import { Leaf, Mail, Lock, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -22,14 +23,35 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
   useEffect(() => {
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) navigate({ to: "/app" });
+    });
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/app" });
     });
+    return () => listener.subscription.unsubscribe();
   }, [navigate]);
 
+  function friendlyAuthError(err: any) {
+    const message = String(err?.message ?? "Something went wrong");
+    const lower = message.toLowerCase();
+    if (lower.includes("already") || lower.includes("registered") || lower.includes("exists")) {
+      return "This email already has an account. Please switch to Sign in and use the same email.";
+    }
+    if (lower.includes("password") && (lower.includes("weak") || lower.includes("pwned") || lower.includes("leaked"))) {
+      return "Please choose a stronger password that has not been used on other websites.";
+    }
+    if (lower.includes("invalid login") || lower.includes("credentials")) {
+      return "Email or password is incorrect. Please check it and try again.";
+    }
+    return message;
+  }
+
   async function signInGoogle() {
+    setFeedback(null);
     setLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
@@ -39,30 +61,50 @@ function AuthPage() {
       if (result.redirected) return;
       navigate({ to: "/app" });
     } catch (err: any) {
-      toast.error(err.message ?? "Google sign-in failed");
+      const text = friendlyAuthError(err) || "Google sign-in failed";
+      setFeedback({ type: "error", text });
+      toast.error(text);
       setLoading(false);
     }
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    setFeedback(null);
     setLoading(true);
     try {
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanName = name.trim();
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email, password,
-          options: { data: { full_name: name }, emailRedirectTo: `${window.location.origin}/app` },
+        if (!cleanName) throw new Error("Please enter your name.");
+        const { data, error } = await supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: { data: { full_name: cleanName }, emailRedirectTo: `${window.location.origin}/app` },
         });
         if (error) throw error;
+        if (!data.session) {
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+          if (!loginError && loginData.session) {
+            toast.success("Welcome to AgriVision AI 🌱");
+            navigate({ to: "/app" });
+            return;
+          }
+          setMode("signin");
+          setFeedback({ type: "success", text: "Account created. Please sign in with your email and password." });
+          return;
+        }
         toast.success("Welcome to AgriVision AI 🌱");
         navigate({ to: "/app" });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
         if (error) throw error;
         navigate({ to: "/app" });
       }
     } catch (err: any) {
-      toast.error(err.message ?? "Something went wrong");
+      const text = friendlyAuthError(err);
+      setFeedback({ type: "error", text });
+      toast.error(text);
     } finally {
       setLoading(false);
     }
@@ -70,6 +112,7 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-10">
+      <Toaster position="top-center" richColors />
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center justify-center gap-3 mb-8">
           <div className="w-12 h-12 rounded-2xl grad-leaf flex items-center justify-center clay-sm">
@@ -84,6 +127,13 @@ function AuthPage() {
             {mode === "signin" ? "Sign in to continue caring for your fields." : "Create your account in seconds."}
           </p>
 
+          {feedback && (
+            <div className={`mb-4 flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${feedback.type === "error" ? "border-destructive/20 bg-destructive/10 text-destructive" : "border-primary/20 bg-primary/10 text-primary"}`}>
+              {feedback.type === "error" ? <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> : <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />}
+              <span>{feedback.text}</span>
+            </div>
+          )}
+
           <form onSubmit={submit} className="space-y-4">
             {mode === "signup" && (
               <div className="clay-inset px-4 py-3 flex items-center gap-3">
@@ -92,7 +142,8 @@ function AuthPage() {
                   className="bg-transparent outline-none w-full text-sm"
                   placeholder="Your name"
                   value={name}
-                  onChange={e => setName(e.target.value)}
+                  onChange={e => { setName(e.target.value); setFeedback(null); }}
+                  autoComplete="name"
                   required
                 />
               </div>
@@ -100,16 +151,18 @@ function AuthPage() {
             <div className="clay-inset px-4 py-3 flex items-center gap-3">
               <Mail className="w-4 h-4 text-primary" />
               <input
-                type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                type="email" required value={email} onChange={e => { setEmail(e.target.value); setFeedback(null); }}
                 placeholder="you@farm.com"
+                autoComplete="email"
                 className="bg-transparent outline-none w-full text-sm"
               />
             </div>
             <div className="clay-inset px-4 py-3 flex items-center gap-3">
               <Lock className="w-4 h-4 text-primary" />
               <input
-                type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
+                type="password" required minLength={6} value={password} onChange={e => { setPassword(e.target.value); setFeedback(null); }}
                 placeholder="Password (min 6 chars)"
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
                 className="bg-transparent outline-none w-full text-sm"
               />
             </div>
@@ -146,7 +199,7 @@ function AuthPage() {
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {mode === "signin" ? "New here?" : "Already a member?"}{" "}
-            <button onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="text-primary font-semibold hover:underline">
+            <button onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setFeedback(null); }} className="text-primary font-semibold hover:underline">
               {mode === "signin" ? "Create an account" : "Sign in"}
             </button>
           </div>
