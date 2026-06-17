@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { analyzeDisease } from "@/server/agri.functions";
+import { analyzeDisease } from "@/lib/agri.functions";
 import { Upload, Loader2, Stethoscope, Heart, Shield, Pill, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { authedCall, getStoredLanguage } from "@/lib/api";

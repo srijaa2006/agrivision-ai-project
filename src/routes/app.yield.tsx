@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { predictYield } from "@/server/agri.functions";
+import { predictYield } from "@/lib/agri.functions";
 import { LineChart, Loader2, Heart, Sprout, AlertTriangle, Lightbulb, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { authedCall, getStoredLanguage } from "@/lib/api";
