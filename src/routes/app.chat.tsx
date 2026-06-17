@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { chatWithAssistant, getChatHistory } from "@/server/agri.functions";
+import { chatWithAssistant, getChatHistory } from "@/lib/agri.functions";
 import { MessageCircleHeart, Send, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { authedCall, getStoredLanguage } from "@/lib/api";

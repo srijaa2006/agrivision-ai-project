@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getHistory } from "@/server/agri.functions";
+import { getHistory } from "@/lib/agri.functions";
 import { History as HistoryIcon, Stethoscope, LineChart, Loader2 } from "lucide-react";
 import { authedCall } from "@/lib/api";
 

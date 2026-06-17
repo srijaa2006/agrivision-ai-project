@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { translateUI } from "@/server/i18n.functions";
+import { translateUI } from "@/lib/i18n.functions";
 import { getStoredLanguage } from "@/lib/api";
 
 // Master English dictionary — all UI strings used across pages.
